@@ -6,6 +6,7 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
+
     <!-- 卡片视图区域 -->
     <el-card>
       <!-- 搜索与添加区域 -->
@@ -72,6 +73,7 @@
         :total="total"
       ></el-pagination>
     </el-card>
+
     <!-- 添加用户的对话框 -->
     <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
       <!-- 内容主体区域 -->
@@ -95,6 +97,7 @@
         <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
+
     <!-- 修改用户的对话框 -->
     <el-dialog title="修改用户" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
       <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
@@ -113,11 +116,39 @@
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配角色的对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+      @close="setRoleDialogClosed"
+    >
+      <div>
+        <p>当前的用户：{{userInfo.username}}</p>
+        <p>当前的角色：{{userInfo.role_name}}</p>
+        <p>
+          分配新角色：
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
+
 <script>
 export default {
-  name: "Users",
   data() {
     // 验证邮箱的规则
     var checkEmail = (rule, value, cb) => {
@@ -231,6 +262,7 @@ export default {
       }
       this.userlist = res.data.users;
       this.total = res.data.total;
+      console.log(res);
     },
     // 监听 pagesize 改变的事件
     handleSizeChange(newSize) {
@@ -244,7 +276,9 @@ export default {
       this.queryInfo.pagenum = newPage;
       this.getUserList();
     },
+    // 监听 switch 开关状态的改变
     async userStateChanged(userinfo) {
+      console.log(userinfo);
       const { data: res } = await this.$http.put(
         `users/${userinfo.id}/state/${userinfo.mg_state}`
       );
@@ -253,7 +287,8 @@ export default {
         return this.$message.error("更新用户状态失败！");
       }
       this.$message.success("更新用户状态成功！");
-    }, // 监听添加用户对话框的关闭事件
+    },
+    // 监听添加用户对话框的关闭事件
     addDialogClosed() {
       this.$refs.addFormRef.resetFields();
     },
@@ -274,7 +309,8 @@ export default {
         // 重新获取用户列表数据
         this.getUserList();
       });
-    }, // 展示编辑用户的对话框
+    },
+    // 展示编辑用户的对话框
     async showEditDialog(id) {
       // console.log(id)
       const { data: res } = await this.$http.get("users/" + id);
@@ -387,5 +423,6 @@ export default {
   },
 };
 </script>
+
 <style lang="less" scoped>
 </style>
