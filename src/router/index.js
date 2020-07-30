@@ -6,6 +6,7 @@ import Users from '../components/user/Users.vue'
 import Welcome from '../components/Welcome.vue'
 import Rights from "../components/power/Rights.vue"
 import Roles from "../components/power/Roles.vue"
+import Cate from "../components/goods/Cate.vue"
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
@@ -25,7 +26,8 @@ const routes = [
       { path: '/welcome', component: Welcome },
       { path: '/users', component: Users },
       { path: '/rights', component: Rights },
-      { path: '/roles', component: Roles }
+      { path: '/roles', component: Roles },
+      { path: '/categories', component: Cate }
     ]
   }
 ]
