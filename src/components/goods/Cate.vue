@@ -44,10 +44,31 @@
         </template>
         <!-- 操作 -->
         <template slot="opt" slot-scope="scope">
-          <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-edit"
+            size="mini"
+            @click="showEditDialog(scope.row)"
+          >编辑</el-button>
           <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
         </template>
       </tree-table>
+
+      <!-- 修改分类的对话框 -->
+      <el-dialog title="修改分类" :visible.sync="dialogVisible" width="30%">
+        <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
+          <el-form-item label="分类名称">
+            <el-input v-model="editForm.cat_name"></el-input>
+          </el-form-item>
+          <el-form-item label="级别" prop="email">
+            <el-input v-model="editForm.cat_level"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="editCateInfo">确 定</el-button>
+        </span>
+      </el-dialog>
 
       <!-- 分页区域 -->
       <el-pagination
@@ -114,6 +135,7 @@ export default {
       catelist: [],
       // 总数据条数
       total: 0,
+      editForm: {},
       // 为table指定列的定义
       columns: [
         {
@@ -142,6 +164,9 @@ export default {
           template: "opt",
         },
       ],
+      editFormRules: {},
+      // 控制修改分类的对话框的显示与隐藏
+      editDialogVisible: false,
       // 控制添加分类对话框的显示与隐藏
       addCateDialogVisible: false,
       // 添加分类的表单数据对象
@@ -153,6 +178,8 @@ export default {
         // 分类的等级，默认要添加的是1级分类
         cat_level: 0,
       },
+      //
+      dialogVisible: false,
       // 添加分类表单的验证规则对象
       addCateFormRules: {
         cat_name: [
@@ -265,6 +292,39 @@ export default {
       this.selectedKeys = [];
       this.addCateForm.cat_level = 0;
       this.addCateForm.cat_pid = 0;
+    },
+    // 点击按钮，展示修改的对话框
+    async showEditDialog(scope) {
+      const { data: res } = await this.$http.get("categories/" + scope.cat_id, {
+        params: scope.attr_name,
+      });
+
+      if (res.meta.status !== 200) {
+        return this.$message.error("查询用户信息失败！");
+      }
+      this.editForm = res.data;
+      this.dialogVisible = true;
+    },
+    // 修改用户信息并提交
+    async editCateInfo() {
+      // 发起修改用户信息的数据请求
+      const { data: res } = await this.$http.put(
+        "categories/" + this.editForm.cat_id,
+        {
+          cat_name: this.editForm.cat_name,
+        }
+      );
+      console.log(this.editForm.cat_id);
+      if (res.meta.status !== 200) {
+        return this.$message.error("更新用户信息失败！");
+      }
+
+      // 关闭对话框
+      this.dialogVisible = false;
+      // 刷新数据列表
+      this.getCateList();
+      // 提示修改成功
+      this.$message.success("更新用户信息成功！");
     },
   },
 };
